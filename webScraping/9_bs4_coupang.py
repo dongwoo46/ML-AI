@@ -12,18 +12,42 @@ soup = BeautifulSoup(res.text, "lxml")
 items = soup.find_all("li", attrs={"class":re.compile("^search-product")})
 # print(items[0].find("div",attrs={"class":"name"}).get_text())
 for item in items:
+    
+    # 광고제품은 제외
+    ad_badge = item.find("span", attrs={"class":"ad-badge-text"})
+    if ad_badge:
+        print("광고상품")
+        continue
+    
     name = item.find("div",attrs={"class":"name"}).get_text() # 제품명
+    
+    # 애플제품 제외 
+    if "Apple" in name:
+        print("Apple 상품 제외")
+        continue
+    
     price = item.find("strong", attrs={"class":"price-value"}).get_text() # 가격
+    
+    # 리뷰 100개 이상 평점 4.5이상 만 조회
     rate = item.find("em", attrs={"class":"rating"}) # 평점
     if rate:
         rate = rate.get_text()
     else:
-        rate ="평점없음"
+        print("평점 없는 제품 제외")
+        continue
+    
+    
     rate_cnt = item.find("span", attrs={"class":"rating-total-count"}) # 평점수
     if rate_cnt:
         rate_cnt = rate_cnt.get_text()
+        rate_cnt = rate_cnt[1:-1]
+        #print("리뷰수",rate_cnt)
     else:
-        rate_cnt = "평점 수 없음"
+        print("평점 수 없음 ")
+        continue
+    
+    if float(rate) >=4.5 and int(rate_cnt)>=100:
+        print(name, price, rate, rate_cnt)
         
-    print(name, price, rate, rate_cnt)
+    
     
